@@ -2,50 +2,78 @@
 
 ## Primary Source
 
-CMS HCAHPS patient experience data serves as the public data source for the reporting workflow. The dataset is available through the CMS Provider Data Catalog and includes hospital-level patient survey measures used for patient experience reporting.
+CMS HCAHPS patient experience data serves as the public data source for the reporting workflow. The project uses the CMS Provider Data Catalog API to retrieve a filtered extract from the hospital-level HCAHPS dataset.
 
-## Obtaining the Data
+## Dataset Details
 
-1. Go to the CMS Provider Data Catalog.
-2. Search for HCAHPS patient survey or hospital HCAHPS data.
-3. Select the current HCAHPS patient survey dataset.
-4. Download the CSV file from the catalog.
-5. Save the raw CSV in `data/raw/`.
+| Item | Value |
+| --- | --- |
+| Dataset | Patient survey (HCAHPS) - Hospital |
+| Dataset ID | `dgck-syfz` |
+| Source | CMS Provider Data Catalog |
+| Data dictionary file reference | `HCAHPS-HOSPITAL.CSV` |
+| CMS landing page | `https://data.cms.gov/provider-data/dataset/dgck-syfz` |
 
-The preparation script does not download data automatically. This keeps the workflow transparent and avoids relying on an unstable direct download URL. If CMS provides a stable direct CSV download link in the future, that link can be documented here before adding any automated download step.
+The raw full CSV is not committed to this repository because the dataset is large. The workflow uses the CMS API to pull only the fields needed for the dashboard and applies a configurable state filter.
 
-## Source Use
+## API-Based Workflow
 
-The project structure supports placing downloaded CMS HCAHPS CSV files in `data/raw/`. The preparation script loads the raw file, standardizes column names, identifies discharge and patient experience measures, assigns dashboard categories, and creates a cleaned output in `data/processed/`.
+The default workflow queries the CMS Provider Data Catalog API for Florida (`FL`) records:
+
+```bash
+python scripts/prepare_hcahps_data.py
+```
+
+The default state filter supports the first portfolio dashboard version. To change the state:
+
+```bash
+python scripts/prepare_hcahps_data.py --state GA
+```
+
+To pull all states, use:
+
+```bash
+python scripts/prepare_hcahps_data.py --all-states
+```
+
+Pulling all states may create a large output file.
+
+## Local CSV Option
+
+The script also supports a manually downloaded or filtered CSV extract saved in `data/raw/`:
+
+```bash
+python scripts/prepare_hcahps_data.py --input-mode local
+```
+
+This option is useful when working from a CMS export or a pre-filtered extract. The full raw CMS file should remain outside the repository unless it is small enough and appropriate to version.
 
 ## Data Handling Notes
 
-- Raw source files remain unchanged in `data/raw/`.
-- Processed files are generated from scripted cleaning steps.
+- API extracts and local CSV inputs are processed through the same cleaning workflow.
 - No synthetic records or placeholder results are included.
-- Source metadata, file names, and download dates should be documented when data files are added.
 - The workflow does not invent findings or fill missing CMS values with artificial results.
+- Facility IDs are preserved as text so leading zeroes are not lost.
+- Numeric fields are converted where possible while original CMS text values are retained.
+- CMS footnote fields are kept when available.
 
 ## Relevant Measure Areas
 
-- Communication with nurses and doctors
-- Responsiveness of hospital staff
 - Discharge information
-- Care transition
+- Communication with nurses
+- Communication with doctors
 - Communication about medicines
 - Overall hospital rating
 - Willingness to recommend
+- Summary star rating
 
-## Expected Raw File Location
+## Output Files
 
-Place the CMS HCAHPS CSV in:
-
-```text
-data/raw/
-```
-
-The cleaned dashboard-ready file is exported to:
+The workflow exports:
 
 ```text
 data/processed/hcahps_patient_experience_clean.csv
+data/processed/hcahps_patient_experience_fl_clean.csv
 ```
+
+The Florida-specific file is exported when the default `FL` filter is used.

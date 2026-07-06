@@ -1,104 +1,174 @@
-"""Prepare CMS HCAHPS patient experience data for dashboard reporting.
+"""Prepare CMS HCAHPS hospital patient experience data for reporting.
 
-The script expects a CMS HCAHPS CSV file in data/raw/. It standardizes column
-names, keeps fields useful for patient experience reporting, assigns dashboard
-categories, and exports a cleaned CSV to data/processed/.
+Default workflow:
+    python scripts/prepare_hcahps_data.py
 
-No data is downloaded here, and no synthetic records are generated.
+The default API mode pulls a filtered Florida extract from the CMS Provider Data
+Catalog API for dataset dgck-syfz. A local CSV mode is also available for a
+manually downloaded extract saved in data/raw/.
+
+No synthetic data is generated.
 """
 
+from __future__ import annotations
+
+import argparse
+import json
 from pathlib import Path
 import re
 import sys
+from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 import pandas as pd
 
+
+DATASET_ID = "dgck-syfz"
+DATASET_NAME = "Patient survey (HCAHPS) - Hospital"
+API_URL = f"https://data.cms.gov/provider-data/api/1/datastore/query/{DATASET_ID}/0"
+DEFAULT_STATE_FILTER = "FL"
+DEFAULT_PAGE_SIZE = 5000
 
 RAW_DATA_DIR = Path("data/raw")
 PROCESSED_DATA_DIR = Path("data/processed")
 OUTPUT_FILE = PROCESSED_DATA_DIR / "hcahps_patient_experience_clean.csv"
 
-MEASURE_KEYWORDS = {
-    "Discharge & Care Transition": [
-        "h_comp_6",
-        "h_comp_7",
-        "discharge",
-        "care transition",
-        "transition",
-    ],
-    "Communication": [
-        "h_comp_1",
-        "h_comp_2",
-        "h_comp_5",
-        "communication with nurses",
-        "communication with doctors",
-        "communication about medicines",
-        "communicate with nurses",
-        "communicate with doctors",
-        "nurses communicated",
-        "doctors communicated",
-        "staff explained",
-        "medicines",
-        "medications",
-    ],
-    "Responsiveness": [
-        "h_comp_3",
-        "responsiveness",
-        "responsive",
-        "staff responded",
-        "help as soon as",
-        "call button",
-    ],
-    "Overall Experience": [
-        "h_hsp_rating",
-        "overall hospital rating",
-        "overall rating",
-        "rating of hospital",
-    ],
-    "Recommendation": [
-        "h_recmnd",
-        "recommend",
-        "willingness to recommend",
-    ],
-}
-
-COLUMN_CANDIDATES = {
-    "provider_id": [
-        "provider_id",
-        "facility_id",
-        "hospital_id",
-        "cms_certification_number_ccn",
-    ],
-    "hospital_name": [
-        "hospital_name",
-        "facility_name",
-        "provider_name",
-    ],
-    "state": [
-        "state",
-    ],
-    "measure_id": [
-        "measure_id",
-        "hcahps_measure_id",
-    ],
-    "measure_name": [
-        "measure_name",
-        "hcahps_question",
-        "hcahps_answer_description",
-        "survey_question",
-    ],
-}
-
-SCORE_COLUMN_KEYWORDS = [
-    "star_rating",
-    "score",
-    "linear_mean",
-    "top_box",
-    "bottom_box",
-    "middle_box",
-    "percent",
-    "rate",
+API_FIELDS = [
+    "facility_id",
+    "facility_name",
+    "state",
+    "hcahps_measure_id",
+    "hcahps_question",
+    "hcahps_answer_description",
+    "patient_survey_star_rating",
+    "patient_survey_star_rating_footnote",
+    "hcahps_answer_percent",
+    "hcahps_answer_percent_footnote",
+    "hcahps_linear_mean_value",
+    "number_of_completed_surveys",
+    "number_of_completed_surveys_footnote",
+    "survey_response_rate_percent",
+    "survey_response_rate_percent_footnote",
+    "start_date",
+    "end_date",
 ]
+
+REQUIRED_FIELDS = [
+    "facility_id",
+    "facility_name",
+    "state",
+    "hcahps_measure_id",
+    "hcahps_question",
+    "hcahps_answer_description",
+]
+
+NUMERIC_FIELDS = [
+    "patient_survey_star_rating",
+    "hcahps_answer_percent",
+    "hcahps_linear_mean_value",
+    "number_of_completed_surveys",
+    "survey_response_rate_percent",
+]
+
+FOOTNOTE_FIELDS = [
+    "patient_survey_star_rating_footnote",
+    "hcahps_answer_percent_footnote",
+    "number_of_completed_surveys_footnote",
+    "survey_response_rate_percent_footnote",
+]
+
+SUPPRESSED_VALUES = {
+    "",
+    "not applicable",
+    "not available",
+    "not available results are not shown for this measure",
+    "not enough data available",
+}
+
+CATEGORY_RULES = [
+    (
+        "Discharge Information",
+        [
+            "h_comp_6",
+            "discharge",
+        ],
+    ),
+    (
+        "Communication",
+        [
+            "h_comp_1",
+            "h_comp_2",
+            "h_comp_5",
+            "communication with nurses",
+            "communication with doctors",
+            "communication about medicines",
+            "nurses communicated",
+            "doctors communicated",
+            "medicines",
+            "medications",
+        ],
+    ),
+    (
+        "Overall Experience",
+        [
+            "h_hsp_rating",
+            "overall hospital rating",
+            "overall rating",
+            "rating of hospital",
+        ],
+    ),
+    (
+        "Recommendation",
+        [
+            "h_recmnd",
+            "recommend",
+        ],
+    ),
+    (
+        "Summary Rating",
+        [
+            "summary star",
+            "overall star",
+            "h_star_rating",
+            "star rating",
+        ],
+    ),
+]
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line options for API or local CSV mode."""
+    parser = argparse.ArgumentParser(
+        description=f"Prepare CMS {DATASET_NAME} data for dashboard reporting."
+    )
+    parser.add_argument(
+        "--input-mode",
+        choices=["api", "local"],
+        default="api",
+        help="Use the CMS API or a local CSV from data/raw/. Default: api.",
+    )
+    parser.add_argument(
+        "--state",
+        default=DEFAULT_STATE_FILTER,
+        help=(
+            "Two-letter state filter for API mode. Default: FL. "
+            "Use --all-states to pull all states."
+        ),
+    )
+    parser.add_argument(
+        "--all-states",
+        action="store_true",
+        help="Pull all states in API mode. This may create a large output file.",
+    )
+    parser.add_argument(
+        "--page-size",
+        type=int,
+        default=DEFAULT_PAGE_SIZE,
+        help=f"API page size. Default: {DEFAULT_PAGE_SIZE}.",
+    )
+    return parser.parse_args()
 
 
 def snake_case_column(column_name: str) -> str:
@@ -123,150 +193,265 @@ def find_raw_csv() -> Path | None:
     return csv_files[0]
 
 
-def first_existing_column(columns: list[str], candidates: list[str]) -> str | None:
-    """Find the first expected column that exists in the loaded data."""
-    for candidate in candidates:
-        if candidate in columns:
-            return candidate
-    return None
+def build_api_params(
+    limit: int,
+    offset: int,
+    state_filter: str | None,
+) -> list[tuple[str, str | int]]:
+    """Build CMS Provider Data Catalog API parameters."""
+    params: list[tuple[str, str | int]] = [
+        ("limit", limit),
+        ("offset", offset),
+        ("schema", "false"),
+        ("keys", "true"),
+        ("rowIds", "false"),
+    ]
+
+    for index, field in enumerate(API_FIELDS):
+        params.append((f"properties[{index}]", field))
+
+    if state_filter:
+        params.extend(
+            [
+                ("conditions[0][property]", "state"),
+                ("conditions[0][value]", state_filter),
+                ("conditions[0][operator]", "="),
+            ]
+        )
+
+    return params
 
 
-def build_column_map(columns: list[str]) -> dict[str, str]:
-    """Map standardized output fields to available CMS source columns."""
-    column_map = {}
-    missing_fields = []
+def fetch_api_page(
+    limit: int,
+    offset: int,
+    state_filter: str | None,
+) -> dict[str, Any] | list[dict[str, Any]] | None:
+    """Fetch one page of HCAHPS records from the CMS API."""
+    query = urlencode(build_api_params(limit, offset, state_filter))
+    url = f"{API_URL}?{query}"
 
-    for output_field, candidates in COLUMN_CANDIDATES.items():
-        source_column = first_existing_column(columns, candidates)
-        if source_column:
-            column_map[output_field] = source_column
-        else:
-            missing_fields.append(output_field)
-
-    if missing_fields:
-        print("Expected CMS HCAHPS columns were not found.")
-        print("Missing standardized fields:")
-        for field in missing_fields:
-            print(f"- {field}")
-        print("\nAvailable columns:")
-        for column in columns:
-            print(f"- {column}")
-        return {}
-
-    return column_map
-
-
-def measure_category(row: pd.Series) -> str | None:
-    """Assign dashboard category based on measure text."""
-    measure_text = " ".join(
-        str(row.get(column, ""))
-        for column in ["measure_id", "measure_name", "source_measure_text"]
-        if pd.notna(row.get(column, ""))
-    ).lower()
-
-    for category, keywords in MEASURE_KEYWORDS.items():
-        if any(keyword in measure_text for keyword in keywords):
-            return category
-
-    return None
-
-
-def relevant_measure_flag(row: pd.Series) -> bool:
-    """Flag whether the row maps to a dashboard measure category."""
-    return pd.notna(row.get("dashboard_category"))
-
-
-def select_score_columns(columns: list[str]) -> list[str]:
-    """Keep available rating, score, percentage, and rate fields."""
-    selected = []
-    for column in columns:
-        if any(keyword in column for keyword in SCORE_COLUMN_KEYWORDS):
-            selected.append(column)
-    return selected
-
-
-def select_footnote_columns(columns: list[str]) -> list[str]:
-    """Keep footnote fields when CMS includes them."""
-    return [column for column in columns if "footnote" in column]
-
-
-def prepare_hcahps_data(raw_csv: Path) -> pd.DataFrame | None:
-    """Load, standardize, filter, and prepare CMS HCAHPS data."""
     try:
-        df = pd.read_csv(raw_csv, dtype=str)
+        with urlopen(url, timeout=60) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except HTTPError as exc:
+        print(f"CMS API request failed with HTTP status {exc.code}.")
+    except URLError as exc:
+        print(f"CMS API request failed: {exc.reason}")
+    except json.JSONDecodeError as exc:
+        print(f"Could not parse CMS API response as JSON: {exc}")
+
+    return None
+
+
+def load_from_api(state_filter: str | None, page_size: int) -> pd.DataFrame | None:
+    """Load a filtered HCAHPS extract from the CMS Provider Data Catalog API."""
+    if state_filter:
+        print(f"Using CMS API mode with state filter: {state_filter}")
+    else:
+        print("Using CMS API mode with no state filter.")
+        print("Warning: pulling all states may create a large output file.")
+
+    records: list[dict[str, Any]] = []
+    offset = 0
+    total_count: int | None = None
+
+    while True:
+        page = fetch_api_page(page_size, offset, state_filter)
+        if page is None:
+            return None
+
+        if isinstance(page, list):
+            page_records = page
+        else:
+            page_records = page.get("results", [])
+
+        if total_count is None:
+            total_count = page.get("count") if isinstance(page, dict) else None
+            if total_count is not None:
+                print(f"CMS API records available for extract: {total_count:,}")
+
+        if not page_records:
+            break
+
+        records.extend(page_records)
+        print(f"Fetched {len(records):,} records...")
+
+        if len(page_records) < page_size:
+            break
+
+        offset += page_size
+
+    if not records:
+        print("CMS API returned no records for the selected filter.")
+        return None
+
+    return pd.DataFrame(records)
+
+
+def load_from_local_csv() -> pd.DataFrame | None:
+    """Load a manually downloaded CMS HCAHPS CSV extract from data/raw/."""
+    raw_csv = find_raw_csv()
+    if raw_csv is None:
+        print("No local CMS HCAHPS CSV file found in data/raw/.")
+        print("Use API mode or place a downloaded HCAHPS extract in data/raw/.")
+        return None
+
+    print(f"Using local CSV mode with file: {raw_csv}")
+    try:
+        return pd.read_csv(raw_csv, dtype={"facility_id": str, "Facility ID": str})
     except Exception as exc:
         print(f"Could not read CSV file: {raw_csv}")
         print(f"Error: {exc}")
         return None
 
+
+def check_required_columns(df: pd.DataFrame) -> bool:
+    """Stop safely when expected HCAHPS fields are not available."""
+    missing = [field for field in REQUIRED_FIELDS if field not in df.columns]
+    if not missing:
+        return True
+
+    print("Expected CMS HCAHPS columns were not found.")
+    print("Missing fields:")
+    for field in missing:
+        print(f"- {field}")
+
+    print("\nAvailable columns:")
+    for column in df.columns:
+        print(f"- {column}")
+
+    return False
+
+
+def normalize_text(value: Any) -> str:
+    """Return lowercased text for matching and suppressed-value checks."""
+    if pd.isna(value):
+        return ""
+    return str(value).strip().lower()
+
+
+def measure_text(row: pd.Series) -> str:
+    """Combine HCAHPS measure fields for category assignment."""
+    return " ".join(
+        normalize_text(row.get(column, ""))
+        for column in [
+            "hcahps_measure_id",
+            "hcahps_question",
+            "hcahps_answer_description",
+        ]
+    )
+
+
+def dashboard_category(row: pd.Series) -> str:
+    """Assign the dashboard category for each HCAHPS measure row."""
+    text = measure_text(row)
+    measure_id = normalize_text(row.get("hcahps_measure_id", ""))
+
+    for category, keywords in CATEGORY_RULES:
+        if any(keyword in text for keyword in keywords):
+            if category == "Summary Rating" and measure_id.startswith("h_comp_"):
+                continue
+            return category
+
+    return "Other"
+
+
+def is_suppressed(value: Any) -> bool:
+    """Identify missing or suppressed CMS values without dropping the row."""
+    return normalize_text(value) in SUPPRESSED_VALUES
+
+
+def add_numeric_fields(df: pd.DataFrame) -> pd.DataFrame:
+    """Convert dashboard numeric fields while preserving original text fields."""
+    for field in NUMERIC_FIELDS:
+        if field not in df.columns:
+            continue
+
+        numeric_field = f"{field}_numeric"
+        usable_values = df[field].where(~df[field].apply(is_suppressed))
+        df[numeric_field] = pd.to_numeric(usable_values, errors="coerce")
+
+    numeric_columns = [f"{field}_numeric" for field in NUMERIC_FIELDS if f"{field}_numeric" in df]
+    if numeric_columns:
+        df["has_numeric_dashboard_value"] = df[numeric_columns].notna().any(axis=1)
+    else:
+        df["has_numeric_dashboard_value"] = False
+
+    return df
+
+
+def prepare_hcahps_data(df: pd.DataFrame) -> pd.DataFrame | None:
+    """Standardize and prepare HCAHPS data for dashboard use."""
+    df = df.copy()
     df.columns = [snake_case_column(column) for column in df.columns]
-    columns = list(df.columns)
-    column_map = build_column_map(columns)
-    if not column_map:
+
+    if not check_required_columns(df):
         return None
 
-    # Preserve the original measure text before renaming, because some CMS files
-    # separate measure IDs, questions, and answer descriptions.
-    measure_text_columns = [
-        column
-        for column in ["measure_id", "hcahps_measure_id", "measure_name", "hcahps_question", "hcahps_answer_description"]
-        if column in columns
-    ]
-    df["source_measure_text"] = df[measure_text_columns].fillna("").agg(" ".join, axis=1)
+    # Facility IDs are identifiers, not numbers. Keep them as text to preserve
+    # leading zeroes from CMS.
+    df["facility_id"] = df["facility_id"].astype(str).str.strip()
+    df["state"] = df["state"].astype(str).str.strip().str.upper()
 
-    rename_map = {source: output for output, source in column_map.items()}
-    df = df.rename(columns=rename_map)
+    keep_columns = [column for column in API_FIELDS if column in df.columns]
+    keep_columns.extend(column for column in df.columns if "footnote" in column and column not in keep_columns)
+    cleaned = df[keep_columns].copy()
 
-    score_columns = select_score_columns(list(df.columns))
-    footnote_columns = select_footnote_columns(list(df.columns))
+    cleaned["dashboard_category"] = cleaned.apply(dashboard_category, axis=1)
+    cleaned["is_project_measure"] = cleaned["dashboard_category"] != "Other"
+    cleaned = add_numeric_fields(cleaned)
 
-    output_columns = [
-        "provider_id",
-        "hospital_name",
+    sort_columns = [
         "state",
-        "measure_id",
-        "measure_name",
-        "source_measure_text",
+        "facility_name",
+        "dashboard_category",
+        "hcahps_measure_id",
+        "hcahps_answer_description",
     ]
-    output_columns.extend(column for column in score_columns if column not in output_columns)
-    output_columns.extend(column for column in footnote_columns if column not in output_columns)
-
-    cleaned = df[output_columns].copy()
-    cleaned["dashboard_category"] = cleaned.apply(measure_category, axis=1)
-    cleaned["is_dashboard_measure"] = cleaned.apply(relevant_measure_flag, axis=1)
-    cleaned = cleaned[cleaned["is_dashboard_measure"]].copy()
-
-    if cleaned.empty:
-        print("No dashboard-relevant HCAHPS measures were found.")
-        print("Check the measure columns and update MEASURE_KEYWORDS if needed.")
-        return None
-
     cleaned = cleaned.sort_values(
-        by=["state", "hospital_name", "dashboard_category", "measure_name"],
+        by=[column for column in sort_columns if column in cleaned.columns],
         na_position="last",
     )
 
     return cleaned
 
 
-def main() -> None:
-    """Run the CMS HCAHPS data preparation workflow."""
-    raw_csv = find_raw_csv()
-    if raw_csv is None:
-        print("No CMS HCAHPS CSV file found in data/raw/.")
-        print("Download the HCAHPS patient survey CSV from the CMS Provider Data Catalog.")
-        print(f"Place the raw CSV in: {RAW_DATA_DIR}")
-        sys.exit(0)
-
-    print(f"Loading raw CMS HCAHPS file: {raw_csv}")
-    cleaned = prepare_hcahps_data(raw_csv)
-    if cleaned is None:
-        sys.exit(0)
-
+def export_outputs(cleaned: pd.DataFrame, state_filter: str | None) -> None:
+    """Export cleaned dashboard-ready HCAHPS data."""
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
     cleaned.to_csv(OUTPUT_FILE, index=False)
     print(f"Exported cleaned dashboard-ready file: {OUTPUT_FILE}")
+
+    if state_filter and state_filter.upper() == DEFAULT_STATE_FILTER:
+        state_output = (
+            PROCESSED_DATA_DIR
+            / f"hcahps_patient_experience_{state_filter.lower()}_clean.csv"
+        )
+        cleaned.to_csv(state_output, index=False)
+        print(f"Exported default state extract: {state_output}")
+
     print(f"Rows exported: {len(cleaned):,}")
+
+
+def main() -> None:
+    """Run the CMS HCAHPS data preparation workflow."""
+    args = parse_args()
+    state_filter = None if args.all_states else args.state.strip().upper()
+
+    if args.input_mode == "api":
+        df = load_from_api(state_filter=state_filter, page_size=args.page_size)
+    else:
+        df = load_from_local_csv()
+
+    if df is None:
+        sys.exit(0)
+
+    cleaned = prepare_hcahps_data(df)
+    if cleaned is None:
+        sys.exit(0)
+
+    export_outputs(cleaned, state_filter=state_filter)
 
 
 if __name__ == "__main__":
