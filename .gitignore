@@ -29,3 +29,12 @@ excel_dashboard/*
 
 # Logs
 *.log
+
+# Raw downloaded data
+data/raw/*.csv
+
+# Raw data files
+data/raw/*.csv
+
+# Keep cleaned dashboard-ready dataset
+!data/processed/hcahps_patient_experience_fl_clean.csv
