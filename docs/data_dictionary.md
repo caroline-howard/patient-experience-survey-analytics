@@ -1,16 +1,42 @@
 # Data Dictionary
 
-## CMS HCAHPS Data Fields
+## Cleaned CMS HCAHPS Output
 
-| Field | Description | Notes |
-| --- | --- | --- |
-| `provider_id` | Hospital or provider identifier | Source field name may vary by CMS file |
-| `hospital_name` | Hospital name | Standardized during preparation |
-| `state` | Hospital state | Used for filtering and grouping |
-| `measure_id` | HCAHPS measure identifier | Used to filter relevant patient experience measures |
-| `measure_name` | HCAHPS measure label | Human-readable measure name |
-| `score` | Reported measure value | Numeric conversion handled during preparation |
-| `reporting_period` | Reporting period label or date | Standardized when source data is added |
+Output file:
+
+```text
+data/processed/hcahps_patient_experience_clean.csv
+```
+
+| Field name | Source | Description | Dashboard use |
+| --- | --- | --- | --- |
+| `provider_id` | CMS HCAHPS raw CSV | Hospital or provider identifier, standardized from available CMS identifier fields | Hospital-level filtering and joins |
+| `hospital_name` | CMS HCAHPS raw CSV | Hospital or facility name | Dashboard labels and hospital lookup |
+| `state` | CMS HCAHPS raw CSV | Hospital state | State filter and geographic grouping |
+| `measure_id` | CMS HCAHPS raw CSV | HCAHPS measure identifier when available | Measure tracking and validation |
+| `measure_name` | CMS HCAHPS raw CSV | Patient experience measure label or question text | Measure labels in tables and visuals |
+| `source_measure_text` | Script-derived from CMS fields | Combined measure ID, question, and answer text used for category assignment | Audit trail for measure grouping |
+| `dashboard_category` | Script-derived | Portfolio dashboard category assigned from relevant HCAHPS measure text | Primary grouping for dashboard sections |
+| `is_dashboard_measure` | Script-derived | Boolean flag identifying rows selected for the dashboard workflow | Filtering dashboard-ready records |
+| `patient_survey_star_rating` | CMS HCAHPS raw CSV, if available | Patient survey star rating field from CMS | Rating comparison field |
+| `score` | CMS HCAHPS raw CSV, if available | Reported score field from CMS | Measure comparison field |
+| `linear_mean` | CMS HCAHPS raw CSV, if available | Linear mean value field from CMS | Supporting score field |
+| `top_box_percent` | CMS HCAHPS raw CSV, if available | Top-box percentage field from CMS | Percentage-based dashboard measure |
+| `bottom_box_percent` | CMS HCAHPS raw CSV, if available | Bottom-box percentage field from CMS | Supporting percentage field |
+| `survey_response_rate_percent` | CMS HCAHPS raw CSV, if available | Survey response rate field from CMS | Context for survey coverage |
+| `footnote` | CMS HCAHPS raw CSV, if available | CMS footnote or data quality note | Interpretation and data limitation notes |
+
+Score and footnote column names depend on the CMS source file. The preparation script keeps available rating, score, percentage, rate, and footnote fields after standardizing column names.
+
+## Dashboard Categories
+
+| Category | Measure focus |
+| --- | --- |
+| `Discharge & Care Transition` | Discharge information and care transition measures |
+| `Communication` | Communication with nurses, doctors, and about medicines |
+| `Responsiveness` | Responsiveness of hospital staff |
+| `Overall Experience` | Overall hospital rating |
+| `Recommendation` | Willingness to recommend the hospital |
 
 ## Qualtrics Survey Fields
 
