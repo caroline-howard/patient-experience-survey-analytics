@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data and generated outputs
+data/raw/*
+data/processed/*
+reports/*
+excel_dashboard/*
+
+# Keep folder structure
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!reports/.gitkeep
+!excel_dashboard/.gitkeep
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
