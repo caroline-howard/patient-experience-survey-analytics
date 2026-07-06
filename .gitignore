@@ -38,3 +38,5 @@ data/raw/*.csv
 
 # Keep cleaned dashboard-ready dataset
 !data/processed/hcahps_patient_experience_fl_clean.csv
+
+!excel_dashboard/patient_discharge_experience_dashboard.xlsx
