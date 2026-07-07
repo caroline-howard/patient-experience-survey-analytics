@@ -75,6 +75,13 @@ NUMERIC_FIELDS = [
     "survey_response_rate_percent",
 ]
 
+COLUMN_ALIASES = {
+    # CMS downloaded CSV headers use punctuation that snake-cases differently
+    # than the API field names. Normalize both modes to the API-style names.
+    "city_town": "citytown",
+    "county_parish": "countyparish",
+}
+
 CATEGORY_RULES = [
     ("Nurse Communication", ["h_comp_1", "nurses"]),
     ("Doctor Communication", ["h_comp_2", "doctors"]),
@@ -227,7 +234,11 @@ def load_from_local_csv() -> pd.DataFrame | None:
 
     print(f"Using local CSV mode with file: {raw_csv}")
     try:
-        return pd.read_csv(raw_csv, dtype={"facility_id": str, "Facility ID": str})
+        return pd.read_csv(
+            raw_csv,
+            dtype={"facility_id": str, "Facility ID": str},
+            low_memory=False,
+        )
     except Exception as exc:
         print(f"Could not read CSV file: {raw_csv}")
         print(f"Error: {exc}")
@@ -280,6 +291,31 @@ def dashboard_category(row: pd.Series) -> str:
     return "Other"
 
 
+def favorable_response_type(row: pd.Series) -> str:
+    """Identify top-box/favorable HCAHPS answer rows for dashboard scoring."""
+    category = str(row.get("dashboard_category", "")).strip()
+    measure_id = normalize_text(row.get("hcahps_measure_id", ""))
+    answer = normalize_text(row.get("hcahps_answer_description", ""))
+
+    if category in {
+        "Nurse Communication",
+        "Doctor Communication",
+        "Medicine Communication",
+    } and "always" in answer:
+        return "Always"
+
+    if category == "Discharge Information" and answer.startswith("yes"):
+        return "Yes"
+
+    if category == "Overall Rating" and measure_id == "h_hsp_rating_9_10":
+        return "9 or 10"
+
+    if category == "Recommendation" and measure_id == "h_recmnd_dy":
+        return "Definitely yes"
+
+    return ""
+
+
 def add_numeric_fields(df: pd.DataFrame) -> pd.DataFrame:
     """Convert selected CMS fields to numeric companion columns."""
     for field in NUMERIC_FIELDS:
@@ -288,10 +324,37 @@ def add_numeric_fields(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def add_favorable_response_fields(df: pd.DataFrame) -> pd.DataFrame:
+    """Add top-box/favorable-response fields used by the Excel dashboard."""
+    df["favorable_response_type"] = df.apply(favorable_response_type, axis=1)
+    df["is_favorable_response"] = df["favorable_response_type"] != ""
+
+    if "hcahps_answer_percent_numeric" in df.columns:
+        df["favorable_response_percent_numeric"] = df[
+            "hcahps_answer_percent_numeric"
+        ].where(df["is_favorable_response"])
+    else:
+        df["favorable_response_percent_numeric"] = pd.NA
+
+    if {
+        "favorable_response_percent_numeric",
+        "number_of_completed_surveys_numeric",
+    }.issubset(df.columns):
+        df["favorable_response_weighted_numerator"] = (
+            df["favorable_response_percent_numeric"]
+            * df["number_of_completed_surveys_numeric"]
+        )
+    else:
+        df["favorable_response_weighted_numerator"] = pd.NA
+
+    return df
+
+
 def prepare_hcahps_data(df: pd.DataFrame, state_filter: str) -> pd.DataFrame | None:
     """Standardize, filter, categorize, and prepare HCAHPS data."""
     df = df.copy()
     df.columns = [snake_case_column(column) for column in df.columns]
+    df = df.rename(columns={k: v for k, v in COLUMN_ALIASES.items() if k in df.columns})
 
     if not check_required_columns(df):
         return None
@@ -318,6 +381,7 @@ def prepare_hcahps_data(df: pd.DataFrame, state_filter: str) -> pd.DataFrame | N
 
     cleaned = cleaned[cleaned["is_relevant_measure"]].copy()
     cleaned = add_numeric_fields(cleaned)
+    cleaned = add_favorable_response_fields(cleaned)
 
     sort_columns = [
         "facility_name",
