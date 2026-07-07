@@ -2,7 +2,7 @@
 
 ## Primary Source
 
-CMS HCAHPS patient experience data serves as the public data source for the reporting workflow. The project uses the CMS Provider Data Catalog API to retrieve a filtered extract from the hospital-level HCAHPS dataset.
+CMS HCAHPS patient experience data serves as the public data source for the reporting workflow. The project uses CMS hospital-level HCAHPS data and filters it to Florida for the current portfolio dashboard.
 
 ## Dataset Details
 
@@ -11,42 +11,70 @@ CMS HCAHPS patient experience data serves as the public data source for the repo
 | Dataset | Patient survey (HCAHPS) - Hospital |
 | Dataset ID | `dgck-syfz` |
 | Source | CMS Provider Data Catalog |
-| Data dictionary file reference | `HCAHPS-HOSPITAL.CSV` |
 | CMS landing page | `https://data.cms.gov/provider-data/dataset/dgck-syfz` |
+| Current project scope | Florida hospitals |
+| Current reporting period | 07/01/2024-06/30/2025 |
+| Processed output | `data/processed/hcahps_patient_experience_fl_clean.csv` |
+| Dashboard workbook | `excel_dashboard/patient_discharge_experience_dashboard.xlsx` |
 
-The raw full CSV is not committed to this repository because the dataset is large. The workflow uses the CMS API to pull only the fields needed for the dashboard and applies a configurable state filter.
+## API and Local CSV Workflow
 
-## API-Based Workflow
+The preparation script is `scripts/prepare_hcahps_data.py`.
 
-The default workflow queries the CMS Provider Data Catalog API for Florida (`FL`) records:
+The default API workflow pages through the CMS Provider Data Catalog endpoint using `limit` and `offset`:
 
 ```bash
 python scripts/prepare_hcahps_data.py
 ```
 
-The default state filter supports the first portfolio dashboard version. To change the state:
+The script endpoint is:
 
-```bash
-python scripts/prepare_hcahps_data.py --state GA
+```text
+https://data.cms.gov/provider-data/api/1/datastore/query/dgck-syfz/0
 ```
 
-To pull all states, use:
+Current API URL parameters used by the script:
 
-```bash
-python scripts/prepare_hcahps_data.py --all-states
-```
+| Parameter | Purpose |
+| --- | --- |
+| `limit` | API page size; default is `500` |
+| `offset` | Pagination offset |
 
-Pulling all states may create a large output file.
+Important: the current script does **not** request a Florida-only API response. It loads source rows through API pagination, standardizes them in pandas, and then applies the state filter locally.
 
-## Local CSV Option
-
-The script also supports a manually downloaded or filtered CSV extract saved in `data/raw/`:
+The local CSV workflow reads the first CSV found in `data/raw/`:
 
 ```bash
 python scripts/prepare_hcahps_data.py --input-mode local
 ```
 
-This option is useful when working from a CMS export or a pre-filtered extract. The full raw CMS file should remain outside the repository unless it is small enough and appropriate to version.
+The current local raw file available in this working copy is:
+
+```text
+data/raw/HCAHPS-Hospital.csv
+```
+
+That raw CSV is intentionally ignored by Git because it is large. The tracked data artifact is the processed Florida extract:
+
+```text
+data/processed/hcahps_patient_experience_fl_clean.csv
+```
+
+## Configurable State Filter
+
+The script supports a state filter:
+
+```bash
+python scripts/prepare_hcahps_data.py --state FL
+```
+
+To process another state, replace `FL` with another two-letter state code:
+
+```bash
+python scripts/prepare_hcahps_data.py --state GA
+```
+
+There is no `--all-states` argument in the current script.
 
 ## Data Handling Notes
 
@@ -56,8 +84,32 @@ This option is useful when working from a CMS export or a pre-filtered extract. 
 - Facility IDs are preserved as text so leading zeroes are not lost.
 - Numeric fields are converted where possible while original CMS text values are retained.
 - CMS footnote fields are kept when available.
+- Local CSV fields such as `City/Town` and `County/Parish` are normalized to `citytown` and `countyparish` so they align with API-style field names.
+- Favorable-response fields are derived for dashboard scoring, while non-favorable response rows remain available for auditability.
+
+## Favorable-Response Scoring Rules
+
+The dashboard does not average all HCAHPS response buckets together. It uses top-box/favorable-response rows.
+
+| Dashboard category | Favorable response rule |
+| --- | --- |
+| Discharge Information | Answer description starts with `Yes` |
+| Nurse Communication | Answer description contains `Always` |
+| Doctor Communication | Answer description contains `Always` |
+| Medicine Communication | Answer description contains `Always` |
+| Overall Rating | Measure ID is `H_HSP_RATING_9_10` |
+| Recommendation | Measure ID is `H_RECMND_DY` |
+
+The main dashboard metric is a survey-volume-weighted favorable-response percentage:
+
+```text
+sum(favorable_response_percent_numeric * number_of_completed_surveys_numeric)
+/ sum(number_of_completed_surveys_numeric)
+```
 
 ## Relevant Measure Areas
+
+The current dashboard scope includes:
 
 - Discharge information
 - Communication with nurses
@@ -65,15 +117,6 @@ This option is useful when working from a CMS export or a pre-filtered extract. 
 - Communication about medicines
 - Overall hospital rating
 - Willingness to recommend
-- Summary star rating
+- Summary star rating context
 
-## Output Files
-
-The workflow exports:
-
-```text
-data/processed/hcahps_patient_experience_clean.csv
-data/processed/hcahps_patient_experience_fl_clean.csv
-```
-
-The Florida-specific file is exported when the default `FL` filter is used.
+Cleanliness and quietness non-star rows are not part of the current dashboard focus. Cleanliness and quietness star-rating rows are retained only where they appear as summary star-rating rows.
