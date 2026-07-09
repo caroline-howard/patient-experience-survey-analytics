@@ -1,0 +1,7 @@
+dashboard_measure_group,favorable_response_definition,favorable_percent,survey_weight,included_rows,excluded_rows,expected_favorable_percent,expected_difference_points,matches_expected
+Discharge Information,Yes,84.27,626423,521,52,84.27,-0.00,TRUE
+Nurse Communication,Always,76.39,835207,694,70,76.39,0.00,TRUE
+Doctor Communication,Always,74.82,835207,694,70,74.82,0.00,TRUE
+Recommendation,Definitely yes,70.01,208855,175,16,70.01,0.00,TRUE
+Overall Rating,9 or 10,69.07,208855,175,16,69.07,0.00,TRUE
+Medicine Communication,Always,58.01,626423,521,52,58.01,-0.00,TRUE

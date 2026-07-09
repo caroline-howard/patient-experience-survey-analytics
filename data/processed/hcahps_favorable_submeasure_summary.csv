@@ -1,0 +1,17 @@
+dashboard_measure_group,submeasure_label,favorable_response_definition,favorable_percent,survey_weight,included_rows,excluded_rows,expected_favorable_percent,expected_difference_points,matches_expected
+Discharge Information,given recovery information,Yes,84.23,208855,175,16,,,
+Discharge Information,staff discussed help after discharge,Yes,82.82,208784,173,18,,,
+Discharge Information,written symptoms to watch for,Yes,85.75,208784,173,18,,,
+Nurse Communication,overall nurse communication,Always,76.37,208855,175,16,,,
+Nurse Communication,explained clearly,Always,72.19,208784,173,18,,,
+Nurse Communication,listened carefully,Always,73.33,208784,173,18,,,
+Nurse Communication,courtesy/respect,Always,83.68,208784,173,18,,,
+Doctor Communication,overall doctor communication,Always,74.87,208855,175,16,,,
+Doctor Communication,explained clearly,Always,69.79,208784,173,18,,,
+Doctor Communication,listened carefully,Always,72.81,208784,173,18,,,
+Doctor Communication,courtesy/respect,Always,81.82,208784,173,18,,,
+Medicine Communication,overall medicine communication,Always,58.03,208855,175,16,,,
+Medicine Communication,new medication purpose,Always,72.22,208784,173,18,,,
+Medicine Communication,side effects,Always,43.78,208784,173,18,43.78,0.00,TRUE
+Overall Rating,overall rating 9 or 10,9 or 10,69.07,208855,175,16,,,
+Recommendation,definitely recommend,Definitely yes,70.01,208855,175,16,,,

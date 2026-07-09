@@ -1,0 +1,17 @@
+category,submeasure_label,favorable_response_definition,weighted_favorable_percent,simple_average,favorable_row_count,total_survey_weight,interpretation_note
+Discharge Information,given recovery information,Yes,84.23,84.23,175,208855,Discharge process detail for follow-up education and written instruction design.
+Discharge Information,staff discussed help after discharge,Yes,82.82,82.82,173,208784,Discharge process detail for follow-up education and written instruction design.
+Discharge Information,written symptoms to watch for,Yes,85.75,85.75,173,208784,Discharge process detail for follow-up education and written instruction design.
+Nurse Communication,overall nurse communication,Always,76.37,76.37,175,208855,Submeasure detail for dashboard drill-down.
+Nurse Communication,explained clearly,Always,72.19,72.19,173,208784,Use as diagnostic detail for communication clarity and attentiveness.
+Nurse Communication,listened carefully,Always,73.33,73.33,173,208784,Use as diagnostic detail for communication clarity and attentiveness.
+Nurse Communication,courtesy/respect,Always,83.68,83.68,173,208784,Respect/courtesy outperforms explanation and listening items within communication domains.
+Doctor Communication,overall doctor communication,Always,74.87,74.87,175,208855,Submeasure detail for dashboard drill-down.
+Doctor Communication,explained clearly,Always,69.79,69.79,173,208784,Use as diagnostic detail for communication clarity and attentiveness.
+Doctor Communication,listened carefully,Always,72.81,72.81,173,208784,Use as diagnostic detail for communication clarity and attentiveness.
+Doctor Communication,courtesy/respect,Always,81.82,81.82,173,208784,Respect/courtesy outperforms explanation and listening items within communication domains.
+Medicine Communication,overall medicine communication,Always,58.03,58.03,175,208855,Submeasure detail for dashboard drill-down.
+Medicine Communication,new medication purpose,Always,72.22,72.22,173,208784,Submeasure detail for dashboard drill-down.
+Medicine Communication,side effects,Always,43.78,43.78,173,208784,Lowest specific measure; directly supports side-effect explanation survey follow-up.
+Overall Rating,overall rating 9 or 10,9 or 10,69.07,69.07,175,208855,Submeasure detail for dashboard drill-down.
+Recommendation,definitely recommend,Definitely yes,70.01,70.01,175,208855,Submeasure detail for dashboard drill-down.
