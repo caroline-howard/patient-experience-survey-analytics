@@ -1,0 +1,7 @@
+metric_name,weighted_favorable_percent,display_value,interpretation_label,sort_order
+Discharge Information,84.27,84.3%,Strong performance,1
+Nurse Communication,76.39,76.4%,Moderate performance,2
+Doctor Communication,74.82,74.8%,Moderate performance,3
+Medicine Communication,58.01,58.0%,Priority improvement area,4
+Overall Rating,69.07,69.1%,Needs attention,5
+Recommendation,70.01,70.0%,Moderate performance,6

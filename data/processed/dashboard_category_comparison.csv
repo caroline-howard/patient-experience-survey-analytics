@@ -1,0 +1,7 @@
+category,weighted_favorable_percent,simple_average,favorable_row_count,facility_count,total_survey_weight,rank,interpretation_note
+Discharge Information,84.27,83.23,521,175,626423,1,Strongest major category and useful benchmark for clearer discharge follow-up practices.
+Nurse Communication,76.39,76.03,694,175,835207,2,Core communication domain for comparison across categories.
+Doctor Communication,74.82,75.10,694,175,835207,3,Core communication domain for comparison across categories.
+Medicine Communication,58.01,57.89,521,175,626423,6,Lowest major category; prioritize medicine purpose and side-effect explanation follow-up.
+Overall Rating,69.07,67.61,175,175,208855,5,Moderate overall experience signal; monitor alongside communication domains.
+Recommendation,70.01,68.21,175,175,208855,4,Moderate overall experience signal; monitor alongside communication domains.
