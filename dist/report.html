@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HCAHPS Dashboard Companion Report</title>
+    <meta name="description" content="Companion report translating Florida HCAHPS dashboard findings into a Qualtrics implementation improvement survey direction.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="report-page">
+    <header class="site-header">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="brand">Patient Experience Analytics</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="index.html#dashboard">Dashboard Preview</a>
+          <a href="downloads/patient_discharge_experience_dashboard.xlsx">Download Excel</a>
+        </div>
+      </nav>
+      <section class="hero">
+        <p class="eyebrow">Companion Report</p>
+        <h1>From hospital-level HCAHPS findings to patient-level implementation improvement.</h1>
+        <p class="hero-copy">
+          This report explains why Medicine Communication and side-effect explanation should shape the Qualtrics follow-up survey.
+        </p>
+      </section>
+    </header>
+
+    <main class="report-body">
+      <h2>Executive Summary</h2>
+      <p>
+        The statewide HCAHPS dashboard shows a clear pattern: Florida hospitals perform strongest on Discharge Information, while Medicine Communication is the weakest major patient experience category. The most specific gap is side-effect explanation, where favorable performance is substantially lower than the broader category results.
+      </p>
+      <p>
+        This does not necessarily mean that general doctor or nurse communication is weak. Nurse Communication and Doctor Communication are both notably higher than the side-effect explanation measure. The more useful interpretation is that side-effect education may depend on a specific implementation workflow that is not being delivered, owned, timed, or remembered consistently.
+      </p>
+      <p>
+        The future Qualtrics survey should therefore be designed as a hospital implementation and improvement diagnostic. It should help answer where hospitals should invest: staff education, role clarity, pharmacist involvement, discharge checklist design, written materials, teach-back, or post-discharge support.
+      </p>
+
+      <h2>Dashboard Findings</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Dashboard category</th>
+            <th>Favorable-response definition</th>
+            <th>Survey-weighted favorable response rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Discharge Information</td><td>Yes</td><td>84.27%</td></tr>
+          <tr><td>Nurse Communication</td><td>Always</td><td>76.39%</td></tr>
+          <tr><td>Doctor Communication</td><td>Always</td><td>74.82%</td></tr>
+          <tr><td>Recommendation</td><td>Definitely yes</td><td>70.01%</td></tr>
+          <tr><td>Overall Rating</td><td>9 or 10</td><td>69.07%</td></tr>
+          <tr><td>Medicine Communication</td><td>Always</td><td>58.01%</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Submeasure Finding</h2>
+      <p>
+        Side-effect explanation is the lowest specific measure in the validated breakdown, at 43.78%. This is the most important finding for the next phase because it identifies a concrete follow-up topic rather than a broad satisfaction issue.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Submeasure</th>
+            <th>Favorable response rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Medicine Communication</td><td>Overall medicine communication</td><td>58.01%</td></tr>
+          <tr><td>Medicine Communication</td><td>New medication purpose</td><td>72.20%</td></tr>
+          <tr><td>Medicine Communication</td><td>Side effects</td><td>43.78%</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Implementation Interpretation</h2>
+      <p>
+        The dashboard does not suggest that all discharge communication is equally weak. Instead, it points to a narrower issue: patients are less consistently reporting that medication-related information, especially side effects, was explained in the most favorable way.
+      </p>
+      <p>
+        Patients can report that nurses and doctors listened carefully, explained things clearly, or treated them with respect while still leaving without a clear understanding of medication side effects. Those broader communication measures may reflect interpersonal quality, while side-effect education depends on a more specific clinical process.
+      </p>
+      <p><strong>Core implementation question:</strong> If doctor and nurse communication are relatively stronger, why is side-effect explanation so much lower?</p>
+      <ul>
+        <li>No clear owner for side-effect education across doctors, nurses, pharmacists, and discharge staff.</li>
+        <li>Medication purpose is explained, but side effects and warning signs are not consistently covered.</li>
+        <li>Side-effect education happens too late in the discharge process, when patients are overwhelmed.</li>
+        <li>Information is included in written paperwork but not verbally reinforced.</li>
+        <li>Staff communication training emphasizes courtesy and listening but not medication-specific teach-back.</li>
+      </ul>
+
+      <h2>From Dashboard Finding to Survey Design</h2>
+      <p>
+        The Qualtrics follow-up should be designed as a hospital implementation and improvement survey, not a duplicate HCAHPS instrument. The Excel dashboard identifies the problem area: Medicine Communication, especially side-effect explanation. The Qualtrics survey should explain how that gap happens from the patient perspective.
+      </p>
+      <p>
+        The survey should focus on implementation conditions that hospitals can change: who owns side-effect education, when it happens, how it is delivered, whether patients understand what to do, and which supports would make the discharge medication process clearer.
+      </p>
+
+      <h2>Recommended Qualtrics Survey Direction</h2>
+      <ol>
+        <li><strong>Screening and context:</strong> identify whether the patient was discharged with a new medicine, changed medicine, or medication instructions.</li>
+        <li><strong>Role ownership:</strong> ask who explained side effects: doctor, nurse, pharmacist, discharge planner, written instructions only, no one, or not sure.</li>
+        <li><strong>Medication purpose:</strong> ask whether the patient understood what the medicine was for and whether the explanation was clear.</li>
+        <li><strong>Side-effect explanation:</strong> ask whether side effects were explained and whether the patient understood what to watch for.</li>
+        <li><strong>Workflow timing and format:</strong> ask when the explanation happened and whether information was verbal, written, portal-based, or only if the patient asked.</li>
+        <li><strong>Patient understanding and teach-back:</strong> ask whether the patient could identify urgent side effects and knew what action to take.</li>
+        <li><strong>Implementation improvement target:</strong> ask what would have helped most: clearer verbal explanation, simpler written instructions, pharmacist counseling, more time before discharge, caregiver involvement, follow-up call or text, or clearer contact information.</li>
+      </ol>
+
+      <h2>Hospital Improvement Questions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Survey domain</th>
+            <th>What it diagnoses</th>
+            <th>Possible hospital investment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Role ownership</td><td>Whether patients know who explained side effects</td><td>Clarify doctor, nurse, pharmacist, and discharge staff responsibilities</td></tr>
+          <tr><td>Timing</td><td>Whether education happens early enough to absorb</td><td>Move medication counseling earlier in discharge workflow</td></tr>
+          <tr><td>Format</td><td>Whether patients receive verbal, written, or portal-based guidance</td><td>Standardize verbal explanation plus plain-language written materials</td></tr>
+          <tr><td>Content completeness</td><td>Whether purpose, side effects, warning signs, and next steps are covered</td><td>Add side-effect prompts to discharge checklist</td></tr>
+          <tr><td>Patient understanding</td><td>Whether patients know what to do after discharge</td><td>Staff teach-back training</td></tr>
+          <tr><td>Follow-up support</td><td>Whether patients know who to contact</td><td>Post-discharge call, text, portal message, or hotline workflow</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Scope and Transition to Qualtrics</h2>
+      <ul>
+        <li>The source data is public CMS HCAHPS hospital-level reporting data. This is intentional: the hospital-level findings identify where patient-level follow-up should focus.</li>
+        <li>Results are limited to Florida hospitals in the 07/01/2024-06/30/2025 reporting period.</li>
+        <li>Favorable response rates are survey-volume weighted and depend on valid completed survey counts.</li>
+        <li>The Excel dashboard does not show monthly trends because the HCAHPS source is a reporting-period extract.</li>
+        <li>The Qualtrics survey has not yet been fielded. Its purpose is to collect patient-level detail that can help explain whether the HCAHPS pattern reflects staff education needs, role ownership gaps, timing issues, or discharge workflow design.</li>
+      </ul>
+
+      <h2>Conclusion</h2>
+      <p>
+        The Excel dashboard identifies Medicine Communication, and especially side-effect explanation, as the strongest candidate for follow-up investigation. The next phase should convert this insight into a targeted Qualtrics implementation survey that asks patients who explained side effects, when and how the explanation happened, whether they understood what to do after discharge, and what hospital process would have made the information clearer.
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <p><a href="index.html">Back to project page</a> | <a href="downloads/patient_discharge_experience_dashboard.xlsx">Download Excel dashboard</a> | <a href="reports/hcahps_excel_dashboard_companion_report.md">View Markdown report</a></p>
+    </footer>
+  </body>
+</html>

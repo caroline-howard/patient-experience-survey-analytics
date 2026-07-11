@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Patient Discharge Experience Dashboard</title>
+    <meta name="description" content="Florida HCAHPS Excel dashboard and companion report for hospital implementation improvement and Qualtrics survey design.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="index.html">Patient Experience Analytics</a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="#workbook">Workbook</a>
+          <a href="#findings">Findings</a>
+          <a href="#qualtrics">Qualtrics Direction</a>
+          <a href="report.html">Report</a>
+          <a href="https://github.com/caroline-howard/patient-experience-survey-analytics">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="shell hero-grid" aria-labelledby="page-title">
+        <div class="hero-copy-block">
+          <p class="eyebrow">Florida CMS HCAHPS | Reporting period 07/01/2024-06/30/2025</p>
+          <h1 id="page-title">HCAHPS Patient Experience Dashboard</h1>
+          <p class="byline">Created by Caroline Howard</p>
+          <p class="lead">
+            Excel dashboard for Florida HCAHPS results. Main finding: Medicine Communication is the priority follow-up area.
+          </p>
+          <div class="meta-strip" aria-label="Project scope">
+            <div>
+              <span>Scope</span>
+              <strong>Florida hospitals</strong>
+            </div>
+            <div>
+              <span>Data level</span>
+              <strong>Hospital reporting data</strong>
+            </div>
+            <div>
+              <span>Primary use</span>
+              <strong>Implementation planning</strong>
+            </div>
+          </div>
+        </div>
+
+        <aside class="delivery-panel" aria-label="Project deliverables">
+          <div class="panel-title">Delivery package</div>
+          <div class="deliverable">
+            <span class="deliverable-kicker">Excel workbook</span>
+            <strong>Dashboard, category detail, hospital comparison</strong>
+          </div>
+          <div class="deliverable">
+            <span class="deliverable-kicker">Companion report</span>
+            <strong>Findings, limitations, Qualtrics survey direction</strong>
+          </div>
+          <div class="deliverable">
+            <span class="deliverable-kicker">Design principle</span>
+            <strong>No fake monthly trends; reporting-period extract only</strong>
+          </div>
+          <div class="action-row">
+            <a class="button primary" href="downloads/patient_discharge_experience_dashboard.xlsx">Download workbook</a>
+            <a class="button secondary" href="report.html">Open report</a>
+            <a class="button secondary" href="https://github.com/caroline-howard/patient-experience-survey-analytics">View GitHub</a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="shell project-flow" aria-label="How to read this project">
+        <div class="flow-intro">
+          <p class="section-label">Page flow</p>
+          <h2>How to read this project</h2>
+        </div>
+        <ol class="flow-steps">
+          <li><strong>Preview</strong></li>
+          <li><strong>Workbook</strong></li>
+          <li><strong>Insights</strong></li>
+          <li><strong>Navigate</strong></li>
+          <li><strong>Report</strong></li>
+        </ol>
+      </section>
+
+      <section class="shell workbook-section" id="workbook">
+        <div class="section-heading-row compact-heading">
+          <div>
+            <p class="section-label">1. Excel preview</p>
+            <h2>Actual workbook preview</h2>
+          </div>
+          <p>Rendered from the Excel file.</p>
+        </div>
+        <div class="workbook-layout">
+          <article class="workbook-preview featured-preview">
+            <div class="preview-toolbar">
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+              <strong id="preview-title">Dashboard sheet preview</strong>
+            </div>
+            <div class="preview-tabs" aria-label="Switch workbook preview">
+              <button class="preview-tab active" type="button" data-title="Dashboard sheet preview" data-src="assets/gifs/dashboard-overview.gif" data-alt="Animated preview of the Excel dashboard overview sheet.">Dashboard</button>
+              <button class="preview-tab" type="button" data-title="Category_Detail sheet preview" data-src="assets/gifs/category-detail.gif" data-alt="Animated preview of the Excel category detail sheet.">Category_Detail</button>
+              <button class="preview-tab" type="button" data-title="Hospital_Detail sheet preview" data-src="assets/gifs/hospital-detail.gif" data-alt="Animated preview of the Excel hospital detail sheet.">Hospital_Detail</button>
+              <button class="preview-tab" type="button" data-title="README sheet preview" data-src="assets/gifs/workbook-navigation.gif" data-alt="Animated preview of the Excel README and workbook navigation sheet.">README</button>
+            </div>
+            <img id="workbook-preview-image" src="assets/gifs/dashboard-overview.gif" alt="Animated preview of the Excel dashboard overview sheet.">
+          </article>
+
+          <aside class="finding-brief">
+            <div>
+              <p class="eyebrow">Executive finding</p>
+              <h2>Medication education is the gap.</h2>
+              <p>Nurse and doctor communication score higher than Medicine Communication.</p>
+            </div>
+            <dl class="stat-list">
+              <div>
+                <dt>Medicine Communication</dt>
+                <dd>58.0% favorable</dd>
+              </div>
+              <div>
+                <dt>Side-effect explanation</dt>
+                <dd>43.8% favorable</dd>
+              </div>
+              <div>
+                <dt>Recommended next step</dt>
+                <dd>Patient-level Qualtrics implementation survey</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+
+        <div class="workbook-value">
+          <p class="section-label">2. What the Excel provides</p>
+          <h2>What the workbook provides</h2>
+          <p>Statewide summary -> submeasure detail -> hospital benchmark.</p>
+        </div>
+
+        <div class="preview-row" aria-label="Workbook sheet previews and benefits">
+          <article class="mini-preview workbook-card">
+            <img src="assets/gifs/dashboard-overview.gif" alt="Animated preview of the statewide dashboard overview sheet.">
+            <div>
+              <strong>Dashboard</strong>
+              <span>Statewide executive view</span>
+              <em>Ranks major categories and flags the priority area.</em>
+            </div>
+          </article>
+          <article class="mini-preview workbook-card">
+            <img src="assets/gifs/category-detail.gif" alt="Animated preview of the category detail sheet.">
+            <div>
+              <strong>Category_Detail</strong>
+              <span>Submeasure diagnosis</span>
+              <em>Shows which submeasures drive the category result.</em>
+            </div>
+          </article>
+          <article class="mini-preview workbook-card">
+            <img src="assets/gifs/hospital-detail.gif" alt="Animated preview of the hospital detail sheet.">
+            <div>
+              <strong>Hospital_Detail</strong>
+              <span>Facility benchmark comparison</span>
+              <em>Compares each facility with the Florida average.</em>
+            </div>
+          </article>
+          <article class="mini-preview workbook-card">
+            <img src="assets/gifs/workbook-navigation.gif" alt="Animated preview of the workbook navigation and README sheet.">
+            <div>
+              <strong>README and source tabs</strong>
+              <span>Transparent workbook structure</span>
+              <em>Documents scope, definitions, and source tables.</em>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell insight-section" id="findings">
+        <div class="section-heading-row compact-heading">
+          <div>
+            <p class="section-label">3. Insights from the Excel</p>
+            <h2>Key dashboard insight</h2>
+          </div>
+          <p>Higher favorable response rates are better.</p>
+        </div>
+        <div class="metric-band" aria-label="Statewide favorable response rates">
+          <article class="metric strong">
+            <span class="metric-name">Discharge Information</span>
+            <strong>84.3%</strong>
+            <span>Strongest area</span>
+          </article>
+          <article class="metric">
+            <span class="metric-name">Nurse Communication</span>
+            <strong>76.4%</strong>
+            <span>Moderate performance</span>
+          </article>
+          <article class="metric">
+            <span class="metric-name">Doctor Communication</span>
+            <strong>74.8%</strong>
+            <span>Moderate performance</span>
+          </article>
+          <article class="metric">
+            <span class="metric-name">Recommendation</span>
+            <strong>70.0%</strong>
+            <span>Moderate global signal</span>
+          </article>
+          <article class="metric">
+            <span class="metric-name">Overall Rating</span>
+            <strong>69.1%</strong>
+            <span>Needs attention</span>
+          </article>
+          <article class="metric priority">
+            <span class="metric-name">Medicine Communication</span>
+            <strong>58.0%</strong>
+            <span>Priority improvement area</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell navigation-callout">
+        <div>
+          <p class="section-label">4. How the Excel is navigable</p>
+          <h2>Navigation path</h2>
+        </div>
+        <ul>
+          <li><strong>Dashboard</strong> statewide story</li>
+          <li><strong>Category_Detail</strong> submeasure drivers</li>
+          <li><strong>Hospital_Detail</strong> facility benchmarks</li>
+          <li><strong>README/source</strong> methods and source data</li>
+        </ul>
+      </section>
+
+      <section class="shell analysis-grid" id="qualtrics">
+        <article class="analysis-card dark-card">
+          <p class="eyebrow">5. Report and Qualtrics direction</p>
+          <h2>Use HCAHPS to target patient-level follow-up.</h2>
+          <p>
+            The report connects dashboard findings to Qualtrics implementation questions.
+          </p>
+        </article>
+
+        <article class="analysis-card">
+          <h3>Survey domains</h3>
+          <ul class="check-list">
+            <li>New or changed medication at discharge</li>
+            <li>Who explained purpose and side effects</li>
+            <li>When and how the explanation occurred</li>
+            <li>Verbal, written, portal, caregiver, or no explanation</li>
+            <li>Teach-back and patient understanding</li>
+            <li>Who to contact after discharge</li>
+          </ul>
+        </article>
+
+        <article class="analysis-card accent-card">
+          <h3>Implementation question</h3>
+          <p>
+            If nurse and doctor communication are relatively high, why is side-effect explanation low?
+          </p>
+        </article>
+      </section>
+
+      <section class="shell table-section">
+        <div class="section-heading-row">
+          <div>
+            <p class="section-label">Decision map</p>
+            <h2>Survey to action</h2>
+          </div>
+          <p>Each domain maps to an operational lever.</p>
+        </div>
+        <table class="workflow-table">
+          <thead>
+            <tr>
+              <th>Survey domain</th>
+              <th>What it diagnoses</th>
+              <th>Possible hospital investment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Role ownership</td>
+              <td>Whether patients know who explained side effects</td>
+              <td>Clarify doctor, nurse, pharmacist, and discharge staff responsibilities</td>
+            </tr>
+            <tr>
+              <td>Timing</td>
+              <td>Whether medication education happens early enough to absorb</td>
+              <td>Move medication counseling earlier in discharge workflow</td>
+            </tr>
+            <tr>
+              <td>Format</td>
+              <td>Whether education is verbal, written, portal-based, or only patient-initiated</td>
+              <td>Standardize verbal explanation plus plain-language written materials</td>
+            </tr>
+            <tr>
+              <td>Patient understanding</td>
+              <td>Whether patients know urgent side effects and next steps</td>
+              <td>Staff teach-back training and clearer side-effect scripts</td>
+            </tr>
+            <tr>
+              <td>Follow-up support</td>
+              <td>Whether patients know who to contact after discharge</td>
+              <td>Post-discharge call, text, portal message, or hotline workflow</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="shell artifact-band">
+        <div>
+          <p class="section-label">Artifacts</p>
+          <h2>Workbook and companion report</h2>
+          <p>
+            Download the workbook or read the full insight breakdown.
+          </p>
+        </div>
+        <div class="action-row">
+          <a class="button primary" href="downloads/patient_discharge_experience_dashboard.xlsx">Download workbook</a>
+          <a class="button secondary-dark" href="report.html">Read report</a>
+          <a class="button secondary-dark" href="https://github.com/caroline-howard/patient-experience-survey-analytics">View GitHub repo</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <span>Created by Caroline Howard.</span>
+        <span>Public CMS HCAHPS hospital-level reporting data only.</span>
+        <span>No patient-level microdata or Qualtrics response export is included.</span>
+      </div>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>
